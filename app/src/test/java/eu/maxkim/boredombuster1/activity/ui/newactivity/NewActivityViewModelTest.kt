@@ -1,5 +1,6 @@
 package eu.maxkim.boredombuster1.activity.ui.newactivity
 
+import app.cash.turbine.test
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeDeleteActivity
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeGetRandomActivity
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeIsActivitySaved
@@ -8,6 +9,9 @@ import eu.maxkim.boredombuster1.activity.fake.usecase.activity1
 import eu.maxkim.boredombuster1.activity.fake.usecase.activity2
 import eu.maxkim.boredombuster1.util.CoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -164,4 +168,61 @@ class NewActivityViewModelTest {
         // Assert
         assert(fakeDeleteActivity.wasCalled)
     }
+
+    // Turbine is a small library that makes testing Flows really easy and intuitive
+    // we can test our Flows in the following manner:
+    // flowOf("one", "two").test {
+    //     assertEquals("one", awaitItem())
+    //     assertEquals("two", awaitItem())
+    //     awaitComplete()
+    // }
+    // The Turbine's test() function is a suspend function, so we will need to run our test with the
+    // runTest coroutine builder
+    @Test
+    fun `calling loadNewActivity() twice goes through expected ui states`() = runTest {
+        val fakeGetRandomActivity = FakeGetRandomActivity()
+        val viewModel = NewActivityViewModel(
+            fakeGetRandomActivity,
+            FakeSaveActivity(),
+            FakeDeleteActivity(),
+            FakeIsActivitySaved()
+        )
+
+        // We want the initial state of UI to be Loading
+        assert(viewModel.uiState.value is NewActivityUiState.Loading)
+
+        // have to collect our flow with the test() function in a separate coroutine so it is not
+        // suspending the whole test
+        launch {
+            viewModel.uiState.test {
+                with(awaitItem()) {
+                    // after the first load completes, we expect the state to change to Success with
+                    // the corresponding activity
+                    assert(this is NewActivityUiState.Success)
+                    assertEquals((this as NewActivityUiState.Success).activity, activity1)
+                }
+
+                // Calling loadNewActivity() again should change the state back to Loading
+                assert(awaitItem() is NewActivityUiState.Loading)
+
+                with(awaitItem()) {
+                    // finish with another Success containing the second activity
+                    assert(this is NewActivityUiState.Success)
+                    assertEquals((this as NewActivityUiState.Success).activity, activity2)
+                }
+                // this is not necessary for this specific test but better safe than sorry
+                // especially when dealing with hot flows
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+        // runs the initial loading
+        runCurrent()
+
+        // prepares and runs the second loading
+        fakeGetRandomActivity.activity = activity2
+        viewModel.loadNewActivity()
+        runCurrent()
+    }
+
 }
