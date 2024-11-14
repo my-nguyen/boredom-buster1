@@ -17,8 +17,7 @@ class FavoritesViewModel @Inject constructor(
     private val deleteActivity: DeleteActivity
 ) : ViewModel() {
 
-    // We are using live data instead of state flow just to
-    // include live data tests as well
+    // We are using live data instead of state flow just to include live data tests as well
     val uiStateLiveData: LiveData<FavoritesUiState> = getFavoriteActivities()
         .map { list ->
             if (list.isEmpty()) {
