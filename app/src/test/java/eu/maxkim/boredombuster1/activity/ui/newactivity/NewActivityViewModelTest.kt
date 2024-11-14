@@ -5,6 +5,7 @@ import eu.maxkim.boredombuster1.activity.fake.usecase.FakeGetRandomActivity
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeIsActivitySaved
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeSaveActivity
 import eu.maxkim.boredombuster1.activity.fake.usecase.activity1
+import eu.maxkim.boredombuster1.activity.fake.usecase.activity2
 import eu.maxkim.boredombuster1.util.CoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
@@ -98,4 +99,31 @@ class NewActivityViewModelTest {
         val actualState = viewModel.uiState.value
         assertEquals(actualState, expectedUiState)
     }
+
+    // test whether the new activity loads and replaces the current one when calling loadNewActivity() explicitly
+    @Test
+    fun `calling loadNewActivity() updates ui state with a new activity`() {
+        // Arrange
+        val fakeGetRandomActivity = FakeGetRandomActivity()
+        val viewModel = NewActivityViewModel(
+            fakeGetRandomActivity,
+            FakeSaveActivity(),
+            FakeDeleteActivity(),
+            FakeIsActivitySaved()
+        )
+        // this can be omitted, but it is nice to not have any pending tasks
+        coroutineRule.testDispatcher.scheduler.runCurrent()
+
+        val expectedUiState = NewActivityUiState.Success(activity2, false)
+        fakeGetRandomActivity.activity = activity2
+
+        // Act
+        viewModel.loadNewActivity()
+        coroutineRule.testDispatcher.scheduler.runCurrent()
+
+        // Assert
+        val actualState = viewModel.uiState.value
+        assertEquals(actualState, expectedUiState)
+    }
+
 }
