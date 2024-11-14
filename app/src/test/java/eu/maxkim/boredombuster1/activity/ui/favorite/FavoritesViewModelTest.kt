@@ -8,6 +8,9 @@ import eu.maxkim.boredombuster1.activity.fake.usecase.activity2
 import eu.maxkim.boredombuster1.activity.model.Activity
 import eu.maxkim.boredombuster1.activity.usecase.DeleteActivity
 import eu.maxkim.boredombuster1.activity.usecase.GetFavoriteActivities
+import eu.maxkim.boredombuster1.util.CoroutineRule
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -38,6 +41,9 @@ class FavoritesViewModelTest {
     // CoroutineRule does, only for Architecture components
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val coroutineRule = CoroutineRule()
 
     // use the mock() method from mockito-kotlin library
     private val mockGetFavoriteActivities: GetFavoriteActivities = mock()
@@ -107,5 +113,28 @@ class FavoritesViewModelTest {
         // Assert
         verify(activityListObserver, times(1)).onChanged(activityListCaptor.capture())
         assert(activityListCaptor.value is FavoritesUiState.Empty)
+    }
+
+    // test whether calling deleteActivity() interacts with the correct use case. let's do this one
+    // using mocks to have both options.
+    @Test
+    fun `calling deleteActivity() interacts with the correct use case`() = runTest {
+        // Arrange
+        val viewModel = FavoritesViewModel(
+            mockGetFavoriteActivities,
+            mockDeleteActivity
+        )
+
+        // Act
+        // deleteActivity() launches a coroutine in the viewModelScope, and we need to set the
+        // Dispatcher.Main. we need to add our CoroutineRule to this test class.
+        viewModel.deleteActivity(activity1)
+        advanceUntilIdle() // works the same as runCurrent() in this case
+
+        // Assert
+        // we try to verify that the deleteActivity() method interacted with our mockDeleteActivity,
+        // but our use case's invoke() method is suspend, so we need a coroutine.
+        // the way to get into the coroutine world in tests is by using runTest coroutine builder
+        verify(mockDeleteActivity, times(1)).invoke(activity1)
     }
 }
