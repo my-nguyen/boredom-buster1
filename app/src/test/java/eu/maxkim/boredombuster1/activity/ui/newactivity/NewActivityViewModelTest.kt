@@ -4,29 +4,16 @@ import eu.maxkim.boredombuster1.activity.fake.usecase.FakeDeleteActivity
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeGetRandomActivity
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeIsActivitySaved
 import eu.maxkim.boredombuster1.activity.fake.usecase.FakeSaveActivity
-import kotlinx.coroutines.Dispatchers
+import eu.maxkim.boredombuster1.util.CoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class NewActivityViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineRule = CoroutineRule()
 
     // test that after creating the viewModel the initial value of the uiState is NewActivityUiState.Loading
     @Test
