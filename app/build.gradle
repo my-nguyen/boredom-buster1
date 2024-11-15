@@ -101,4 +101,7 @@ dependencies {
     testImplementation "app.cash.turbine:turbine:$turbine_version"
     testImplementation "androidx.arch.core:core-testing:$arch_testing_version"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
+    androidTestImplementation "androidx.arch.core:core-testing:$arch_testing_version"
+    androidTestImplementation "org.mockito:mockito-android:$mockito_android_version"
+    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
 }
