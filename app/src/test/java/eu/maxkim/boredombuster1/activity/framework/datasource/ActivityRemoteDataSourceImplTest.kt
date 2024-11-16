@@ -1,5 +1,6 @@
 package eu.maxkim.boredombuster1.activity.framework.datasource
 
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import eu.maxkim.boredombuster1.activity.framework.api.ActivityApiClient
 import eu.maxkim.boredombuster1.activity.framework.api.ActivityTypeAdapter
@@ -13,6 +14,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -67,6 +69,46 @@ class ActivityRemoteDataSourceImplTest {
         // Assert
         assert(result is Result.Success)
         assertEquals((result as Result.Success).data, expectedActivity)
+    }
+
+    // test when the response is successful, but JSON is malformed
+    @Test
+    fun `malformed response returns json error result`() = runTest {
+        // Arrange
+        val response = MockResponse()
+            .setBody(errorResponse)
+            .setResponseCode(200)
+
+        mockWebServer.enqueue(response)
+
+        val activityRemoteDataSource = ActivityRemoteDataSourceImpl(apiClient)
+
+        // Act
+        val result = activityRemoteDataSource.getActivity()
+
+        // Assert
+        assert(result is Result.Error)
+        assert((result as Result.Error).error is JsonDataException)
+    }
+
+    // test when the response itself has failed
+    @Test
+    fun `error response returns http error result`() = runTest {
+        // Arrange
+        val response = MockResponse()
+            .setBody(errorResponse)
+            .setResponseCode(400)
+
+        mockWebServer.enqueue(response)
+
+        val activityRemoteDataSource = ActivityRemoteDataSourceImpl(apiClient)
+
+        // Act
+        val result = activityRemoteDataSource.getActivity()
+
+        // Assert
+        assert(result is Result.Error)
+        assert((result as Result.Error).error is HttpException)
     }
 
 }
