@@ -104,4 +104,5 @@ dependencies {
     androidTestImplementation "androidx.arch.core:core-testing:$arch_testing_version"
     androidTestImplementation "org.mockito:mockito-android:$mockito_android_version"
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
 }
