@@ -5,6 +5,7 @@ import eu.maxkim.boredombuster1.activity.framework.datasource.FakeActivityLocalD
 import eu.maxkim.boredombuster1.activity.framework.datasource.FakeActivityRemoteDataSource
 import eu.maxkim.boredombuster1.model.Result
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -55,5 +56,31 @@ class ActivityRepositoryImplTest {
         // Assert
         assert(result is Result.Success)
         assertEquals((result as Result.Success).data, expectedActivity)
+    }
+
+    // test that getNewActivityInANewCoroutine calls remote data source in a separate coroutine
+    @Test
+    fun `getNewActivityInANewCoroutine correctly calls remote data source`() = runTest {
+        // Arrange
+        val fakeRemoteRepository = FakeActivityRemoteDataSource()
+        val activityRepository = ActivityRepositoryImpl(
+            appScope = this,
+            ioDispatcher = StandardTestDispatcher(testScheduler),
+            remoteDataSource = fakeRemoteRepository,
+            localDataSource = FakeActivityLocalDataSource()
+        )
+
+        // Act
+        activityRepository.getNewActivityInANewCoroutine()
+        // immediately after getNewActivityInANewCoroutine(), we need to call either runCurrent()
+        // or advanceUntilIdle().
+        // but getNewActivityInANewCoroutine() calls delay().
+        // runCurrent() runs all the current tasks without advancing the virtual time
+        // advanceUntilIdle() will advance the virtual time until there are no more tasks
+        // so we must call advanceUntilIdle() and not runCurrent() here.
+        advanceUntilIdle()
+
+        // Assert
+        assert(fakeRemoteRepository.getActivityWasCalled)
     }
 }
