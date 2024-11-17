@@ -105,4 +105,5 @@ dependencies {
     androidTestImplementation "org.mockito:mockito-android:$mockito_android_version"
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
 }
