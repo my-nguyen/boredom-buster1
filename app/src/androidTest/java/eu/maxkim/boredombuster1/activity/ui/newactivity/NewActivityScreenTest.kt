@@ -6,10 +6,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import eu.maxkim.boredombuster1.R
+import eu.maxkim.boredombuster1.Tags
 import eu.maxkim.boredombuster1.activity.framework.datasource.androidActivity1
 import org.junit.Rule
 import org.junit.Test
@@ -76,5 +78,27 @@ class NewActivityScreenTest {
             .performClick()
 
         verify(onFavoriteClick, times(1)).invoke(!isFavorite)
+    }
+
+    // test if clicking a link on the activity card triggers the onLinkClick callback.
+    @Test
+    fun onLinkClickCallbackIsTriggered() {
+        val onLinkClick: (link: String) -> Unit = mock()
+
+        composeTestRule.setContent {
+            NewActivityCard(
+                modifier = Modifier.fillMaxWidth(),
+                activity = androidActivity1,
+                isFavorite = false,
+                onFavoriteClick = { },
+                onLinkClick = onLinkClick
+            )
+        }
+
+        // use a testTag to find the TextButton composable as a node in the semantics tree
+        composeTestRule.onNodeWithTag(Tags.ActivityLink)
+            .performClick()
+
+        verify(onLinkClick, times(1)).invoke(androidActivity1.link)
     }
 }

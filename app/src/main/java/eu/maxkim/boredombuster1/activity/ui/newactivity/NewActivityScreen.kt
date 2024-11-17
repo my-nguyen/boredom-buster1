@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.maxkim.boredombuster1.R
+import eu.maxkim.boredombuster1.Tags
 import eu.maxkim.boredombuster1.activity.model.Activity
 import eu.maxkim.boredombuster1.activity.ui.accessibilityLabelRes
 import eu.maxkim.boredombuster1.activity.ui.priceLabelRes
@@ -155,8 +157,11 @@ fun NewActivityCard(
             if (activity.link.isNotBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // manually add a testTag to our component to find it later
                 TextButton(
-                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
+                    modifier = Modifier
+                        .align(alignment = Alignment.CenterHorizontally)
+                        .testTag(Tags.ActivityLink),
                     onClick = {
                         onLinkClick(activity.link)
                     }
