@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- we are not using any encryption for our MockWebServer, and the cleartext communication is
+     disabled by default for network security reasons.
+     this file exists in debug/ solely to enable cleartext traffic for debug builds
+ -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="eu.maxkim.boredombuster1">
+
+    <application android:usesCleartextTraffic="true"
+        tools:ignore="MissingApplicationIcon,UnusedAttribute" />
+</manifest>
